@@ -1,41 +1,33 @@
 -- [[ Fox Visuals V2 - UI Engine ]] --
 local CoreGui = game:GetService("CoreGui")
 local TweenService = game:GetService("TweenService")
-local UserInputService = game:Service("UserInputService")
-local RunService = game:Service("RunService")
+local UserInputService = game:GetService("UserInputService")
+local RunService = game:GetService("RunService")
 
--- Удаляем старую версию, если она была запущена
 if CoreGui:FindFirstChild("FoxVisuals_Gui") then
     CoreGui.FoxVisuals_Gui:Destroy()
 end
 
--- Данные из main.lua (защита от вылета, если запускается отдельно)
 local Data = _G.FoxVisualsData or {
     Version = "V2", Name = "Visual_FoxV1", Executor = "Unknown", Platform = "PC",
     GetFPS = function() return 60 end, GetPing = function() return 10 end
 }
+local FoxFunctions = _G.FoxFunctions or {}
 
--- Создание ScreenGui
 local ScreenGui = Instance.new("ScreenGui")
 ScreenGui.Name = "FoxVisuals_Gui"
 ScreenGui.ResetOnSpawn = false
 ScreenGui.Parent = CoreGui
 
--- ГЛАВНОЕ ОКНО
 local MainFrame = Instance.new("Frame")
-MainFrame.Name = "MainFrame"
 MainFrame.Size = UDim2.new(0, 520, 0, 340)
 MainFrame.Position = UDim2.new(0.5, -260, 0.5, -170)
 MainFrame.BackgroundColor3 = Color3.fromRGB(25, 25, 27)
 MainFrame.BorderSizePixel = 0
 MainFrame.ClipsDescendants = true
 MainFrame.Parent = ScreenGui
+Instance.new("UICorner", MainFrame).CornerRadius = UDim.new(0, 10)
 
-local MainCorner = Instance.new("UICorner")
-MainCorner.CornerRadius = UDim.new(0, 10)
-MainCorner.Parent = MainFrame
-
--- ЗАГОЛОВОК (Светящийся теплым светом Visual_FoxV1)
 local Title = Instance.new("TextLabel")
 Title.Size = UDim2.new(0, 200, 0, 40)
 Title.Position = UDim2.new(0, 15, 0, 5)
@@ -45,11 +37,10 @@ Title.TextSize = 18
 Title.TextColor3 = Color3.fromRGB(240, 240, 245)
 Title.TextXAlignment = Enum.TextXAlignment.Left
 Title.TextStrokeTransparency = 0.6
-Title.TextStrokeColor3 = Color3.fromRGB(240, 140, 60) -- Теплое свечение
+Title.TextStrokeColor3 = Color3.fromRGB(240, 140, 60)
 Title.BackgroundTransparency = 1
 Title.Parent = MainFrame
 
--- КНОПКА ЗАКРЫТИЯ/СВОРЫВАНИЯ (В правом верхнем углу)
 local CloseBtn = Instance.new("TextButton")
 CloseBtn.Size = UDim2.new(0, 30, 0, 30)
 CloseBtn.Position = UDim2.new(1, -40, 0, 8)
@@ -60,29 +51,23 @@ CloseBtn.TextColor3 = Color3.fromRGB(200, 200, 200)
 CloseBtn.BackgroundTransparency = 1
 CloseBtn.Parent = MainFrame
 
--- КНОПКА РАЗВЕРТЫВАНИЯ (Сверху экрана по центру)
 local OpenBtn = Instance.new("TextButton")
 OpenBtn.Size = UDim2.new(0, 240, 0, 32)
-OpenBtn.Position = UDim2.new(0.5, -120, 0, -40) -- Прячется за экраном изначально
+OpenBtn.Position = UDim2.new(0.5, -120, 0, -40)
 OpenBtn.BackgroundColor3 = Color3.fromRGB(20, 20, 22)
-OpenBtn.BackgroundTransparency = 0.2 -- Чуть прозрачная
+OpenBtn.BackgroundTransparency = 0.2
 OpenBtn.Text = "Открыть Fox Visuals V2"
 OpenBtn.Font = Enum.Font.GothamSemibold
 OpenBtn.TextSize = 14
 OpenBtn.TextColor3 = Color3.fromRGB(240, 240, 245)
 OpenBtn.Visible = false
 OpenBtn.Parent = ScreenGui
+Instance.new("UICorner", OpenBtn).CornerRadius = UDim.new(0, 8)
 
-local OpenCorner = Instance.new("UICorner")
-OpenCorner.CornerRadius = UDim.new(0, 8)
-OpenCorner.Parent = OpenBtn
-
-local OpenStroke = Instance.new("UIStroke")
-OpenStroke.Color = Color3.fromRGB(240, 150, 70) -- Теплая обводка
+local OpenStroke = Instance.new("UIStroke", OpenBtn)
+OpenStroke.Color = Color3.fromRGB(240, 150, 70)
 OpenStroke.Thickness = 1.5
-OpenStroke.Parent = OpenBtn
 
--- ПАНЕЛЬ СТАТИСТИКИ (Рядом с кнопкой открытия)
 local StatsFrame = Instance.new("Frame")
 StatsFrame.Size = UDim2.new(0, 130, 0, 32)
 StatsFrame.Position = UDim2.new(0.5, 130, 0, -40)
@@ -90,10 +75,7 @@ StatsFrame.BackgroundColor3 = Color3.fromRGB(20, 20, 22)
 StatsFrame.BackgroundTransparency = 0.3
 StatsFrame.Visible = false
 StatsFrame.Parent = ScreenGui
-
-local StatsCorner = Instance.new("UICorner")
-StatsCorner.CornerRadius = UDim.new(0, 8)
-StatsCorner.Parent = StatsFrame
+Instance.new("UICorner", StatsFrame).CornerRadius = UDim.new(0, 8)
 
 local StatsText = Instance.new("TextLabel")
 StatsText.Size = UDim2.new(1, 0, 1, 0)
@@ -104,12 +86,10 @@ StatsText.TextColor3 = Color3.fromRGB(200, 200, 200)
 StatsText.Text = "FPS: -- | Ping: --"
 StatsText.Parent = StatsFrame
 
--- Обновление FPS и Пинга в реальном времени
 RunService.Heartbeat:Connect(function()
     StatsText.Text = string.format("FPS: %d | %dms", Data.GetFPS(), Data.GetPing())
 end)
 
--- ЛОГИКА СВОРЫВАНИЯ И РАЗВЕРТЫВАНИЯ
 CloseBtn.MouseButton1Click:Connect(function()
     MainFrame:TweenPosition(UDim2.new(0.5, -260, 0.5, -600), "Out", "Quint", 0.5, true)
     task.wait(0.2)
@@ -126,7 +106,6 @@ OpenBtn.MouseButton1Click:Connect(function()
     MainFrame:TweenPosition(UDim2.new(0.5, -260, 0.5, -170), "Out", "Quint", 0.5, true)
 end)
 
--- ПЕРЕТАСКИВАНИЕ МЕНЮ (Drag GUI)
 local dragging, dragInput, dragStart, startPos
 MainFrame.InputBegan:Connect(function(input)
     if input.UserInputType == Enum.UserInputType.MouseButton1 then
@@ -148,7 +127,6 @@ UserInputService.InputChanged:Connect(function(input)
     end
 end)
 
--- СОЗДАНИЕ ВКЛАДОК (Контейнеры)
 local TabButtons = Instance.new("Frame")
 TabButtons.Size = UDim2.new(0, 130, 1, -60)
 TabButtons.Position = UDim2.new(0, 10, 0, 50)
@@ -164,20 +142,16 @@ Container.Size = UDim2.new(1, -160, 1, -60)
 Container.Position = UDim2.new(0, 150, 0, 50)
 Container.BackgroundColor3 = Color3.fromRGB(30, 30, 33)
 Container.Parent = MainFrame
+Instance.new("UICorner", Container).CornerRadius = UDim.new(0, 8)
 
-local ContainerCorner = Instance.new("UICorner")
-ContainerCorner.CornerRadius = UDim.new(0, 8)
-ContainerCorner.Parent = Container
-
--- Функция добавления вкладок
 local tabs = {}
 local function createTab(name)
     local Page = Instance.new("ScrollingFrame")
     Page.Size = UDim2.new(1, -10, 1, -10)
     Page.Position = UDim2.new(0, 5, 0, 5)
     Page.BackgroundTransparency = 1
-    Page.CanvasSize = UDim2.new(0, 0, 2, 0)
-    Page.ScrollBarThickness = 2
+    Page.CanvasSize = UDim2.new(0, 0, 0, 400)
+    Page.ScrollBarThickness = 3
     Page.Visible = false
     Page.Parent = Container
     
@@ -204,13 +178,11 @@ local function createTab(name)
     return Page
 end
 
--- Создаем 3 вкладки, запрошенные тобой:
 local TabPlayer = createTab("Игрок")
 local TabVisuals = createTab("Кастомизация")
 local TabProtection = createTab("Защита")
-tabs["Игрок"].Visible = true -- Открыта по умолчанию
+tabs["Игрок"].Visible = true
 
--- ЗАПОЛНЕНИЕ ВКЛАДКИ "ИГРОК" (Информация о системе)
 local function addInfoLabel(parent, text)
     local lbl = Instance.new("TextLabel")
     lbl.Size = UDim2.new(1, 0, 0, 25)
@@ -225,9 +197,62 @@ end
 
 addInfoLabel(TabPlayer, "Устройство: " .. Data.Platform)
 addInfoLabel(TabPlayer, "Инжектор: " .. Data.Executor)
-addInfoLabel(TabPlayer, "Версия скрипта: " .. Data.Version)
+addInfoLabel(TabPlayer, "Версия: " .. Data.Version)
 
-print("[Fox Visuals UI]: Интерфейс успешно сгенерирован!")
+local function createButton(parent, text, callback)
+    local b = Instance.new("TextButton")
+    b.Size = UDim2.new(1, -10, 0, 35)
+    b.BackgroundColor3 = Color3.fromRGB(45, 45, 48)
+    b.Font = Enum.Font.GothamSemibold
+    b.TextSize = 13
+    b.TextColor3 = Color3.fromRGB(230, 230, 235)
+    b.Text = text
+    b.Parent = parent
+    Instance.new("UICorner", b).CornerRadius = UDim.new(0, 6)
+    
+    b.MouseButton1Click:Connect(callback)
+    return b
+end
 
--- Подгружаем файл функций (Заготовка, свяжем позже)
--- _G.FoxFunctions.Init(TabPlayer, TabVisuals, TabProtection)
+createButton(TabVisuals, "Надеть Черный Korblox (Визуально)", function()
+    if FoxFunctions.ApplyKorblox then FoxFunctions.ApplyKorblox(Color3.fromRGB(15, 15, 15)) end
+end)
+
+createButton(TabVisuals, "Надеть Фиолетовый Korblox (Визуально)", function()
+    if FoxFunctions.ApplyKorblox then FoxFunctions.ApplyKorblox(Color3.fromRGB(130, 50, 200)) end
+end)
+
+createButton(TabVisuals, "Убрать голову (Headless)", function()
+    if FoxFunctions.RemoveHead then FoxFunctions.RemoveHead() end
+end)
+
+createButton(TabVisuals, "Кастомное Космическое Небо", function()
+    if FoxFunctions.SetSkybox then FoxFunctions.SetSkybox("Space") end
+end)
+
+createButton(TabVisuals, "Включить ESP на Роли (MM2)", function()
+    if FoxFunctions.CreateMM2Esp then 
+        task.spawn(function()
+            while task.wait(5) do
+                FoxFunctions.CreateMM2Esp()
+            end
+        end)
+    end
+end)
+
+local flingActive = false
+local flingBtn
+flingBtn = createButton(TabProtection, "Анти-Флинг: ВЫКЛ", function()
+    flingActive = not flingActive
+    if flingActive then
+        flingBtn.Text = "Анти-Флинг: ВКЛ"
+        flingBtn.BackgroundColor3 = Color3.fromRGB(60, 130, 60)
+        if FoxFunctions.ToggleAntiFling then FoxFunctions.ToggleAntiFling(true) end
+    else
+        flingBtn.Text = "Анти-Флинг: ВЫКЛ"
+        flingBtn.BackgroundColor3 = Color3.fromRGB(45, 45, 48)
+        if FoxFunctions.ToggleAntiFling then FoxFunctions.ToggleAntiFling(false) end
+    end
+end)
+
+print("[Fox Visuals UI]: Связывание интерфейса и логики успешно завершено!")
