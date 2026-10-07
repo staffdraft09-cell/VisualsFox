@@ -1,8 +1,8 @@
 -- [[ Fox Visuals V2 - Main Loader ]] --
-local Players = game:Service("Players")
-local UserInputService = game:Service("UserInputService")
-local RunService = game:Service("RunService")
-local Stats = game:Service("Stats")
+local Players = game:GetService("Players")
+local UserInputService = game:GetService("UserInputService")
+local RunService = game:GetService("RunService")
+local Stats = game:GetService("Stats")
 
 local LocalPlayer = Players.LocalPlayer
 
@@ -14,7 +14,6 @@ local function getExecutor()
     elseif textexecutor then
         return "Text Executor"
     elseif checkclosure then
-        -- Если явной функции нет, проверяем по косвенным признакам (зависит от xeno/solara)
         return "Unknown (Supported)"
     else
         return "Solara/Xeno or Similar"
@@ -34,14 +33,15 @@ local function getPlatform()
     end
 end
 
--- 3. СБОР СТАТИСТИКИ (ПРИМЕРНЫЙ ФПС И ПИНГ)
+-- 3. СБОР СТАТИСТИКИ (ФПС И ПИНГ)
 local fps = 0
 RunService.RenderStepped:Connect(function(deltaTime)
     fps = math.floor(1 / deltaTime)
 end)
 
 local function getPing()
-    return math.floor(Stats.Network.ServerStatsItem["Data Ping"]:GetValue())
+    local s, v = pcall(function() return math.floor(Stats.Network.ServerStatsItem["Data Ping"]:GetValue()) end)
+    return s and v or 0
 end
 
 -- Сборка данных в глобальную таблицу, чтобы gui.lua мог их прочитать
@@ -56,14 +56,10 @@ _G.FoxVisualsData = {
 
 print("[Fox Visuals]: Данные успешно собраны! Запуск интерфейса...")
 
--- [[ ССЫЛКА НА ТВОЙ ФАЙЛ GUI НА GITНUB ]]
--- Замени URL ниже на прямую (RAW) ссылку твоего gui.lua, когда загрузишь его на GitHub!
-local gui_url = "https://githubusercontent.com"
+-- ТВОИ RAW-ССЫЛКИ С GITНUB
+local functions_url = "https://raw.githubusercontent.com/staffdraft09-cell/VisualsFox/refs/heads/main/functions.lua"
+local gui_url = "https://raw.githubusercontent.com/staffdraft09-cell/VisualsFox/refs/heads/main/gui.lua"
 
-local success, err = pcall(function()
-    loadstring(game:HttpGet(gui_url))()
-end)
-
-if not success then
-    warn("[Fox Visuals Error]: Не удалось загрузить GUI: " .. tostring(err))
-end
+-- Загружаем логику, а затем сам GUI
+pcall(function() loadstring(game:HttpGet(functions_url))() end)
+pcall(function() loadstring(game:HttpGet(gui_url))() end)
