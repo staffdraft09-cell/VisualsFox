@@ -255,4 +255,4 @@ flingBtn = createButton(TabProtection, "Анти-Флинг: ВЫКЛ", function
     end
 end)
 
-print("[Fox Visuals UI]: Связывание интерфейса и логики успешно завершено!")
+print("[Fox Visuals UI]: Инициализация GUI завершена успешно!")
