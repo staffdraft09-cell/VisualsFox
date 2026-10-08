@@ -1,0 +1,15 @@
+local CoreGui = game:GetService("CoreGui")
+local Players = game:GetService("Players")
+local TargetParent
+
+-- Если инжектор поддерживает скрытый CoreGui — используем его, иначе кидаем в PlayerGui
+local success, _ = pcall(function() return CoreGui.Name end)
+if success then
+    TargetParent = CoreGui
+else
+    TargetParent = Players.LocalPlayer:WaitForChild("PlayerGui")
+end
+
+if TargetParent:FindFirstChild("FoxVisuals_Gui") then
+    TargetParent.FoxVisuals_Gui:Destroy()
+end
